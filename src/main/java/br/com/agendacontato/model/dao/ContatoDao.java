@@ -1,7 +1,9 @@
 package br.com.agendacontato.model.dao;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import br.com.agendacontato.infra.ConexaoJdbc;
@@ -18,7 +20,7 @@ public class ContatoDao implements BaseDao<Contato, Long> {
 	}
 
 	@Override
-	public void create(Contato entity) throws SQLException {
+	public void create(Contato contato) throws SQLException {
 
 		statement = "INSERT INTO contato(nome, fone, email, observacao) values(?, ?, ?, ?)";
 
@@ -38,8 +40,21 @@ public class ContatoDao implements BaseDao<Contato, Long> {
 
 	@Override
 	public List<Contato> findAll() throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		statement = "SELECT nome, fone, email, observacao FROM  contato";
+
+        try (PreparedStatement preparedStatement = this.conexao.getConnection().prepareStatement(statement);
+             ResultSet rs = preparedStatement.executeQuery();
+        ) {
+            List<Contato> contatoList = new ArrayList<>();
+            while (rs.next()) {
+                Contato c = new Contato(rs.getString("nome"), rs.getString("fone"), rs.getString("email"));
+                c.setObservacao(rs.getString("observacao"));
+                contatoList.add(c);
+            }
+            return contatoList;
+        } catch (SQLException e) {
+            throw e;
+        }
 	}
 
 	@Override
