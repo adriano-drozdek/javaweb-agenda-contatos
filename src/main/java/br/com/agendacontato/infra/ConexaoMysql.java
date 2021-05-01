@@ -2,8 +2,13 @@ package br.com.agendacontato.infra;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class ConexaoMysql {
+public class ConexaoMysql implements ConexaoJdbc {
+
+	private Connection connection = null;
 
 	// Driver de conexao om o banco
 	private String driver = "com.mysql.cj.jdbc.Driver";
@@ -15,26 +20,44 @@ public class ConexaoMysql {
 	// senha do banco
 	private static final String PASSWORD = "";
 
-	private Connection conectar() {
-		Connection connection = null;
-		try {
-			Class.forName(driver);
-			connection = DriverManager.getConnection(DATABASE_URL, USERNAME, PASSWORD);
-			return connection;
-		} catch (Exception e) {
-			System.out.println(e);
-			return null;
+	public ConexaoMysql() throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
+		this.connection = DriverManager.getConnection(DATABASE_URL, USERNAME, PASSWORD);
+		this.connection.setAutoCommit(false);
+	}
+
+	@Override
+	public Connection getConnection() {
+		return this.connection;
+	}
+
+	@Override
+	public void close() {
+		if (this.connection != null) {
+			try {
+				this.connection.close();
+			} catch (SQLException ex) {
+				Logger.getLogger(ConexaoMysql.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		}
 	}
 
-	public void testaConexao() {
-		try {
-			Connection connection = conectar();
-			System.out.println("Conectado com sucesso ->" + connection);
-			connection.close();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
+	@Override
+	public void commit() throws SQLException {
+		this.connection.commit();
+		this.close();
 	}
 
+	@Override
+	public void rollback() {
+		if (this.connection != null) {
+			try {
+				this.connection.rollback();
+			} catch (SQLException ex) {
+				Logger.getLogger(ConexaoMysql.class.getName()).log(Level.SEVERE, null, ex);
+			} finally {
+				this.close();
+			}
+		}
+	}
 }
