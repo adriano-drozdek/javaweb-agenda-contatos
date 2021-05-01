@@ -21,7 +21,7 @@ import br.com.agendacontato.model.entity.Contato;
 public class ContatoController extends HttpServlet {
 	private static final long serialVersionUID = 1L;;
 	private Contato contato;
-	private ContatoDao contatoDao;
+	private ContatoDao contatoDao = null;
 
 	public ContatoController() {
 		super();
@@ -37,18 +37,19 @@ public class ContatoController extends HttpServlet {
 		}
 	}
 
-	protected void listaContatos(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-
-		List<Contato> contatoList = new ArrayList<>();
+	protected void listaContatos(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException {
 
 		try {
-			contatoList = contatoDao.findAll();
+			contatoDao = new ContatoDao();
+			List<Contato> contatoList = contatoDao.findAll();
 			request.setAttribute("contatos", contatoList);
 			RequestDispatcher dispatcher = request.getRequestDispatcher("agenda.jsp");
 			dispatcher.forward(request, response);
-		} catch (SQLException exception) {
+		} catch (SQLException | ClassNotFoundException exception) {
 			Logger.getLogger(ContatoController.class.getName()).log(Level.SEVERE, null, exception);
 		}
+
 		response.sendRedirect("agenda.jsp");
 	}
 
