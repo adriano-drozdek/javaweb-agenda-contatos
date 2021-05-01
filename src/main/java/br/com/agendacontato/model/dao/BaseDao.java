@@ -16,6 +16,6 @@ public interface BaseDao<T, ID> {
 
     void update(T entity);
 
-    void delete(ID id);
+    void delete(ID id)throws SQLException;
 
 }
