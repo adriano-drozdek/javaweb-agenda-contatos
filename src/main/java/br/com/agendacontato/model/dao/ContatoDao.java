@@ -75,6 +75,7 @@ public class ContatoDao implements BaseDao<Contato, Long> {
 		}
 	}
 
+	
 	@Override
 	public void update(Contato entity) {
 		// TODO Auto-generated method stub
